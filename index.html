@@ -23,7 +23,51 @@
 </head>
 <body onload="Init()">
     <div id="app">
-        <h1> Air Quality Search <h1>
+        <h1> {{title}} <h1>
+        	<div id="map1LocationInfo">
+        		<p><table>
+                    <tr>
+                        <th class="tableHeader" colspan=3> Map 1 </th>
+                    </tr>
+                    <tr class="row2">
+                        <td class="firstColumn">Name: </td>
+                        <td><input type="text" id="loc1Name"/></td>
+                        <td><button> Submit </button></td>
+                    </tr>
+                    <tr>
+                        <td class="firstColumn">Latitude: </td>
+                        <td><input type="text" id="loc1Lat"/></td>
+                    </tr>
+                    <tr>
+                        <td class="firstColumn">Longitude: </td>
+                        <td ><input type="text" id="loc1Long"/></td>
+                        <td><button> Submit </button></td>
+                    </tr>
+                </table></p>
+        	</div>
+
+            <div id="map2LocationInfo">
+                <p><table>
+                    <tr>
+                        <th class="tableHeader" colspan=3> Map 1 </th>
+                    </tr>
+                    <tr class="row2">
+                        <td class="firstColumn">Name: </td>
+                        <td><input type="text" id="loc2Name"/></td>
+                        <td><button> Submit </button></td>
+                    </tr>
+                    <tr>
+                        <td class="firstColumn">Latitude: </td>
+                        <td><input type="text" id="loc2Lat"/></td>
+                    </tr>
+                    <tr>
+                        <td class="firstColumn">Longitude: </td>
+                        <td ><input type="text" id="loc2Long"/></td>
+                        <td><button> Submit </button></td>
+                    </tr>
+                </table></p>
+            </div>
+
 
             <div id="map1">
 
@@ -32,7 +76,6 @@
             <div id="map2">
 
             </div>
-
     </div>
 </body>
 </html>

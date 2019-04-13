@@ -9,23 +9,6 @@ html {
     height: 100%;
 }
 
-input {
-    width: 50%;
-    font-size: 1.2rem;
-    padding: 0.6rem 1.2rem;
-    margin: 1rem;
-}
-
-select {
-    width: 10%;
-    min-width: 8rem;
-    font-size: 1.2rem;
-    margin: 1rem;
-}
-
-option {
-    font-size: 1.2rem;
-}
 
 button {
     font-size: 1.2rem;
@@ -44,7 +27,42 @@ li {
 }
 
 #map1, #map2{
-    height: 180px;
+    margin-top: 2rem;
+    border: 1px solid black;
+    height: 60rem;
+    width: 49%
+}
+
+#map1LocationInfo{
+    float: left;
+    font-size: 2rem;
+    margin-top: 5rem;
+}
+
+#map2LocationInfo{
+    float: right;
+    font-size: 2rem;
+    margin-top: 5rem;
+}
+
+#map1{
+    float: left;
+}
+
+#map2{
+    float: right;
+}
+
+.tableHeader{
+    text-align: center;
+    font-size: 2rem;
+}
+.firstColumn{
+    text-align: right;
+}
+
+tr.row2>td{
+    padding-bottom: 2em;
 }
 
 
