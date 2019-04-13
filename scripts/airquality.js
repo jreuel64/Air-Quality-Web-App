@@ -3,18 +3,8 @@ var auth_data = {};
 
 function Init()
 {
-    app = new Vue({
-        el: "#app",
-        data: {
-            spotify_search: "",
-            spotify_type: "artist",
-            spotify_type_options: [
-                { value: "album", text: "Album" },
-                { value: "artist", text: "Artist" },
-                { value: "playlist", text: "Playlist" },
-                { value: "track", text: "Track" }
-            ],
-            search_results: []
-        }
-    });
+    //map1 is id of div to place in
+    var map1 = L.map("map1").setView([51.505, -.09], 13); //([lat, long], zoom level)
+    //var map2 = L.map("map2").setView([51.505, -.09], 13);
+
 }
