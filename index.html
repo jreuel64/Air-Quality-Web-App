@@ -31,17 +31,17 @@
                     </tr>
                     <tr class="row2">
                         <td class="firstColumn">Name: </td>
-                        <td><input type="text" id="loc1Name"/></td>
-                        <td><button> Submit </button></td>
+                        <td><input v-model="map1_name" id="loc1Name"/></td>
+                        <td><button onclick="mapSubmitName(1)"> Submit </button></td>
                     </tr>
                     <tr>
                         <td class="firstColumn">Latitude: </td>
-                        <td><input type="text" id="loc1Lat"/></td>
+                        <td><input v-model="map1_lat" id="loc1Lat"/></td>
                     </tr>
                     <tr>
                         <td class="firstColumn">Longitude: </td>
-                        <td ><input type="text" id="loc1Long"/></td>
-                        <td><button> Submit </button></td>
+                        <td ><input v-model="map1_long" id="loc1Long"/></td>
+                        <td><button onclick="mapSubmitLongLat(1)"> Submit </button></td>
                     </tr>
                 </table></p>
         	</div>
@@ -53,17 +53,17 @@
                     </tr>
                     <tr class="row2">
                         <td class="firstColumn">Name: </td>
-                        <td><input type="text" id="loc2Name"/></td>
-                        <td><button> Submit </button></td>
+                        <td><input v-model="map2_name" id="loc2Name"/></td>
+                        <td><button onclick="mapSubmitName(1)"> Submit </button></td>
                     </tr>
                     <tr>
                         <td class="firstColumn">Latitude: </td>
-                        <td><input type="text" id="loc2Lat"/></td>
+                        <td><input v-model="map2_lat" id="loc2Lat"/></td>
                     </tr>
                     <tr>
                         <td class="firstColumn">Longitude: </td>
-                        <td ><input type="text" id="loc2Long"/></td>
-                        <td><button> Submit </button></td>
+                        <td ><input v-model="map2_long" id="loc2Long"/></td>
+                        <td><button onclick="mapSubmitLongLat(2)"> Submit </button></td>
                     </tr>
                 </table></p>
             </div>
