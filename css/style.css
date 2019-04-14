@@ -56,6 +56,13 @@ li {
     float: right;
 }
 
+#map1values{
+    float: left;
+}
+#map2values{
+    float: right;
+}
+
 .tableHeader{
     text-align: center;
     font-size: 2rem;
@@ -71,4 +78,15 @@ tr.row2>td{
 .clear{
 	display: block;
 	clear: both;
+}
+.maptable{
+    margin-top: 5rem;
+    font-size: 1rem;
+    border: 2px solid black;
+    width: 50%;
+}
+.maptable th{
+    font-size: 2rem;
+    border: 1px solid black;
+    padding: 1rem;
 }
