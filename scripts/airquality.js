@@ -3,6 +3,12 @@ var app;
 var map1;
 var map2;
 
+/* TODO: re update air quality when:
+    user finished dragging map
+    new coordinates are entered
+
+*/
+
 function Init()
 {
     app = new Vue({
@@ -204,8 +210,12 @@ function populateMarkers(mapNum, json)
 
         var row = $("<tr>");
         var c1 = $("<td>").text(location);
-        var c2 = $("<td>").text(json.results[i].date.local.toString());
+
+        var measurementDate = new Date(json.results[i].date.local);
+        var c2 = $("<td>").text(measurementDate.getMonth() + "-" + measurementDate.getDate() + "-" + measurementDate.getFullYear());
+        
         var c3 = $("<td>").text(json.results[i].value);
+        c3.addClass("c3");
 
         row.append(c1);
         row.append(c2);
@@ -220,8 +230,12 @@ function populateMarkers(mapNum, json)
          
             var row = $("<tr>");
             var c1 = $("<td>").text(location);
-            var c2 = $("<td>").text(json.results[i+1].date.local);
+
+            var measurementDate = new Date(json.results[i+1].date.local);
+            var c2 = $("<td>").text(measurementDate.getMonth() + "-" + measurementDate.getDate() + "-" + measurementDate.getFullYear());
+       
             var c3 = $("<td>").text(json.results[i+1].value);
+            c3.addClass("c3");
 
             row.append(c1);
             row.append(c2);

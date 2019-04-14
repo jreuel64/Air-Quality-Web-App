@@ -58,9 +58,11 @@ li {
 
 #map1values{
     float: left;
+    width: 50%;
 }
 #map2values{
     float: right;
+    width: 50%
 }
 
 .tableHeader{
@@ -83,10 +85,16 @@ tr.row2>td{
     margin-top: 5rem;
     font-size: 1rem;
     border: 2px solid black;
-    width: 50%;
 }
 .maptable th{
     font-size: 2rem;
     border: 1px solid black;
     padding: 1rem;
+    width: 15rem;
+}
+.maptable td{
+    font-size: 1.2rem;
+    border: 1px solid black;
+    padding: .5rem;
+    width: 15rem;
 }
