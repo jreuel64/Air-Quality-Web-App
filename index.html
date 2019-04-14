@@ -24,6 +24,61 @@
 <body onload="Init()">
     <div id="app">
         <h1> Air Quality Search <h1>
+            <div id="filters">
+                <table>
+                    <tr>
+                        <th class="tableHeader" colspan=3>Filter By:</th>
+                    </tr>
+                    <tr>
+                        <td class="firstColumn">Particle Type: </td>
+                        <td><select id="particleType">
+                            <option value="none"> </option>
+                            <option value="pm25">pm25</option>
+                            <option value="pm10">pm10</option>
+                            <option value="so2">so2</option>
+                            <option value="no2">no2</option>
+                            <option value="o3">o3</option>
+                            <option value="co">co</option>
+                            <option value="bc">bc</option>
+                        </select>
+                    </tr>
+                    <tr>
+                        <td class="firstColumn">Min pm25: </td>
+                        <td><input type="number" step=".01" min="0" id="pm25"/></td>
+                    </tr>
+                    <tr>
+                        <td class="firstColumn">Min pm10: </td>
+                        <td><input type="number" step=".01" min="0" id="pm10"/></td>
+                    </tr>
+                    <tr>
+                        <td class="firstColumn">Min so2: </td>
+                        <td><input type="number" step=".01" min="0" id="so2"/></td>
+                    </tr>
+                    <tr>
+                        <td class="firstColumn">Min no2: </td>
+                        <td><input type="number" step=".01" min="0" id="no2"/></td>
+                    </tr>
+                    <tr>
+                        <td class="firstColumn">Min o3: </td>
+                        <td><input type="number" step=".01" min="0" id="o3"/></td>
+                    </tr>
+                    <tr>
+                        <td class="firstColumn">Min co: </td>
+                        <td><input type="number" step=".01" min="0" id="co"/></td>
+                    </tr>
+                    <tr>
+                        <td class="firstColumn">Min bc: </td>
+                        <td><input type="number" step=".01" min="0" id="bc"/></td>
+                    </tr>
+                    <tr>
+                        <td class="firstColumn">Date Range: </td>
+                        <td><input type="date" id="mindate"/></td>
+                        <td> to </td>
+                        <td><input type="date" id="maxdate"/></td>
+                    </tr>
+                </table>
+
+            </div>
         	<div id="map1LocationInfo">
         		<p><table>
                     <tr>

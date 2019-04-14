@@ -29,6 +29,11 @@ li {
     background-color: #CACACA;
 }
 
+#filters{
+    margin-top: 5rem;
+    font-size: 1.5rem;
+}
+
 #map1, #map2{
     margin-top: 2rem;
     border: 1px solid black;

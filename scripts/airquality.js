@@ -21,12 +21,10 @@ var interactionTimer;
         legend for colors
 
     Heatmap visualization when one particle selected
-    
 
-
+    Allow either map along with input location box to go full screen
 
 */
-
 function Init()
 {
     app = new Vue({
@@ -37,7 +35,17 @@ function Init()
             map1_lat: 44.9537,
             map1_long: -93.09, 
             map2_lat: 44.9537,
-            map2_long: -93.09,                
+            map2_long: -93.09,  
+            particleType: null,
+            pm25: null,
+            pm10: null,
+            so2: null,
+            no2: null,
+            o3: null,
+            co: null,
+            bc: null,
+            minDate: null,
+            maxDate: null             
         }
     });
 
@@ -58,7 +66,7 @@ function Init()
     L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
     attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
     maxZoom: 16,
-    minZoom: 1,
+    minZoom: 10,
     id: 'mapbox.streets',
     accessToken: 'pk.eyJ1IjoianJldWVsNjQiLCJhIjoiY2p1ZXMzN3A3MDYyYzQ1bW84Ymcyb2kwMyJ9.PDaEm5xuepXw-U8dtvEAvw'
     }).addTo(map2);
@@ -157,6 +165,8 @@ function loadAirData(mapNum)
 {
     console.log("entered loadAirData");
 
+    updateFilters();
+
     var center;
     var bounds;
     var corner1;
@@ -167,7 +177,7 @@ function loadAirData(mapNum)
 
     date = new Date();
     date.setDate(date.getDate() - 30);
-    console.log(date);
+    //console.log(date);
 
     if(mapNum == 1)
     {
@@ -188,12 +198,12 @@ function loadAirData(mapNum)
 
     radius = getRadius(corner1, corner2);
 
-    console.log("radius: " + radius);
-    console.log(date);
+    //console.log("radius: " + radius);
+    //console.log(date);
 
     url = "https://api.openaq.org/v1/measurements?coordinates=" + center.lat + "," + center.lng + "&radius=" + radius + "&date_from=" + date + "&order_by[]=location&order_by[]=date&sort[]=asc&sort[]=desc&limit=10000";
 
-    console.log(url);
+    //console.log(url);
 
     $.getJSON(url, function(json) {
         populateMarkers(mapNum, json);
@@ -335,4 +345,21 @@ function reloadMapView(mapNum)
     {
         map2.setView([app.map2_lat, app.map2_long]);
     }
+}
+
+function updateFilters()
+{
+    app.particleType = $("#particleType").val();
+    app.pm25 = $("#pm25").val();
+    app.pm10 = $("#pm10").val();
+    app.so2 = $("#so2").val();
+    app.no2 = $("#no2").val();
+    app.o3 = $("#o3").val();
+    app.co = $("#co").val();
+    app.bc = $("#bc").val();
+
+    app.minDate = $("#mindate").val();
+    app.maxDate = $("#maxdate").val();
+
+    console.log(app.maxDate);
 }
