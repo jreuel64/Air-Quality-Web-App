@@ -59,6 +59,8 @@ function Init()
 
     });
 
+    loadAirData(1);
+
 }
 
 function mapSubmitLongLat(mapNum)
@@ -114,20 +116,69 @@ function mapSubmitLongLat(mapNum)
     }
 }
 
-function mapMoved(mapNum)
+function loadAirData(mapNum)
 {
-    console.log("map " + mapNum + " was moved.");
+    console.log("entered loadAirData");
+
+    var center;
+    var bounds;
+    var corner1;
+    var corner2;
+    var radius;
+    var url;
 
     if(mapNum == 1)
     {
-        //console.log(map1.getCenter());
+        center = map1.getCenter();
+        bounds = map1.getBounds();
     }
     else
     {
-        //console.log(map2.getCenter());
+        center = map2.getCenter();
+        bounds = map2.getBounds();
     }
+
+    corner1 = bounds.getNorthWest();
+    corner2 = bounds.getSouthEast();
+
+    //console.log("c1 lat: " + corner1.lat + " c1 long: " + corner1.lng);
+    //console.log("c2 lat: " + corner2.lat + " c2 long: " + corner2.lng);
+
+    radius = getRadius(corner1, corner2);
+
+    console.log("radius: " + radius);
+
+    url = "https://api.openaq.org/v1/latest?coordinates=" + center.lat + "," + center.lng + "&radius=" + radius;
+
+    console.log(url);
+
+    $.getJSON(url, function(json) {
+        console.log(json);
+    });
+
 }
 
+function getRadius(corner1, corner2)
+{
+    var lat1 = corner1.lat;
+    var long1 = corner1.lng;
+    var lat2 = corner2.lat;
+    var long2 = corner2.lng;
+
+    lat1 = lat1 * Math.PI / 180;
+    long1 = long1 * Math.PI / 180;
+    lat2 = lat2 * Math.PI / 180;
+    long2 = long2 * Math.PI / 180;
+
+    //console.log("lat1: " + lat1 + " long1: " + long1 + " lat2: " + lat2 + " long2: " + long2); 
+
+    var a = Math.pow(Math.sin((lat2 - lat1) / 2), 2) + Math.cos(lat1) * Math.cos(lat2) * Math.pow(Math.sin((long2 - long1) / 2), 2);
+    var c = 2 * Math.asin(Math.sqrt(a));
+
+    var radius = (6371000 * c) / 2;
+
+    return radius;
+}
 
 
 function latLongIsValid(lat, long)
