@@ -3,9 +3,27 @@ var app;
 var map1;
 var map2;
 
-/* TODO: re update air quality when:
-    user finished dragging map
-    new coordinates are entered
+var map1markerLayer;
+var map2markerLayer;
+
+var interactionTimer;
+
+/* TODO:
+    Filters
+        particle
+        measurement values
+        select data time range within last 90 days
+
+    Search by location name with nominatim
+        update search box name based on map scroll
+
+    Style background color of particle values to match epa air quality index
+        legend for colors
+
+    Heatmap visualization when one particle selected
+    
+
+
 
 */
 
@@ -26,10 +44,13 @@ function Init()
     map1 = L.map("map1").setView([app.map1_lat, app.map1_long], 13); //([lat, long], zoom level)
     map2 = L.map("map2").setView([app.map2_lat, app.map2_long], 13);
 
+    map1markerLayer = L.layerGroup().addTo(map1);
+    map2markerLayer = L.layerGroup().addTo(map2);
+
     L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
     attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
     maxZoom: 16,
-    minZoom: 9,
+    minZoom: 10,
     id: 'mapbox.streets',
     accessToken: 'pk.eyJ1IjoianJldWVsNjQiLCJhIjoiY2p1ZXMzN3A3MDYyYzQ1bW84Ymcyb2kwMyJ9.PDaEm5xuepXw-U8dtvEAvw'
     }).addTo(map1);
@@ -37,7 +58,7 @@ function Init()
     L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
     attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
     maxZoom: 16,
-    minZoom: 9,
+    minZoom: 1,
     id: 'mapbox.streets',
     accessToken: 'pk.eyJ1IjoianJldWVsNjQiLCJhIjoiY2p1ZXMzN3A3MDYyYzQ1bW84Ymcyb2kwMyJ9.PDaEm5xuepXw-U8dtvEAvw'
     }).addTo(map2);
@@ -45,6 +66,7 @@ function Init()
 
     map1.on("move", function() {
         //console.log("map1 moved");
+        clearTimeout(interactionTimer);
         lat=map1.getCenter().lat;
         long=map1.getCenter().lng;
         //console.log("lat: " + lat + " long: " + long);
@@ -54,13 +76,23 @@ function Init()
 
     map2.on("move", function() {
         //console.log("map1 moved");
+        clearTimeout(interactionTimer);
         lat=map2.getCenter().lat;
         long=map2.getCenter().lng;
         //console.log("lat: " + lat + " long: " + long);
         app.map2_lat=lat.toFixed(5);
         app.map2_long=long.toFixed(5);
-
     });
+
+    map1.on("zoom", function(){
+        clearTimeout(interactionTimer);});
+    map2.on("zoom", function(){
+        clearTimeout(interactionTimer);});
+
+    map1.on("moveend", function(){
+        interactionTimer = setTimeout(()=>{loadAirData(1)}, 500);});
+    map2.on("moveend", function(){
+        interactionTimer = setTimeout(()=>{loadAirData(2)}, 500);});
 
     loadAirData(1);
     loadAirData(2);
@@ -117,6 +149,8 @@ function mapSubmitLongLat(mapNum)
             //$("#loc2Long").val("");
         }
     }
+
+    loadAirData(mapNum);
 }
 
 function loadAirData(mapNum)
@@ -155,8 +189,9 @@ function loadAirData(mapNum)
     radius = getRadius(corner1, corner2);
 
     console.log("radius: " + radius);
+    console.log(date);
 
-    url = "https://api.openaq.org/v1/measurements?coordinates=" + center.lat + "," + center.lng + "&radius=" + radius + "&order_by[]=location&order_by[]=date&sort[]=asc&sort[]=desc&limit=10000&date_from=" + date;
+    url = "https://api.openaq.org/v1/measurements?coordinates=" + center.lat + "," + center.lng + "&radius=" + radius + "&date_from=" + date + "&order_by[]=location&order_by[]=date&sort[]=asc&sort[]=desc&limit=10000";
 
     console.log(url);
 
@@ -196,12 +231,19 @@ function populateMarkers(mapNum, json)
     if(mapNum == 1)
     {
         table = $("#map1table");
+        map1markerLayer.clearLayers();
+
+        //map1markerLayer = L.layerGroup().addTo(map1);
     }
     else
     {
         table = $("#map2table");
+        map2markerLayer.clearLayers();
+
+        //map2markerLayer = L.layerGroup().addTo(map2);
     }
-    for(var i = 0; i < json.meta.found - 1; ++i)
+    table.empty();
+    for(var i = 0; i < json.results.length - 1; ++i)
     {
         var location = json.results[i].location;
         var point = json.results[i].coordinates;
@@ -212,8 +254,8 @@ function populateMarkers(mapNum, json)
         var c1 = $("<td>").text(location);
 
         var measurementDate = new Date(json.results[i].date.local);
-        var c2 = $("<td>").text(measurementDate.getMonth() + "-" + measurementDate.getDate() + "-" + measurementDate.getFullYear());
-        
+        var c2 = $("<td>").text((measurementDate.getMonth()+1) + "-" + measurementDate.getDate() + "-" + measurementDate.getFullYear());
+
         var c3 = $("<td>").text(json.results[i].value);
         c3.addClass("c3");
 
@@ -224,7 +266,7 @@ function populateMarkers(mapNum, json)
         table.append(row);
 
         //while at same location
-        while(i < json.meta.found - 1 && location == json.results[i+1].location)
+        while(i < json.results.length - 1 && location == json.results[i+1].location)
         {
             locAverage = locAverage + json.results[i+1].value;
          
@@ -232,7 +274,7 @@ function populateMarkers(mapNum, json)
             var c1 = $("<td>").text(location);
 
             var measurementDate = new Date(json.results[i+1].date.local);
-            var c2 = $("<td>").text(measurementDate.getMonth() + "-" + measurementDate.getDate() + "-" + measurementDate.getFullYear());
+            var c2 = $("<td>").text((measurementDate.getMonth()+1) + "-" + measurementDate.getDate() + "-" + measurementDate.getFullYear());
        
             var c3 = $("<td>").text(json.results[i+1].value);
             c3.addClass("c3");
@@ -248,24 +290,24 @@ function populateMarkers(mapNum, json)
         }
 
         locAverage = (locAverage / count).toFixed(2);
-        console.log(i + " " + locAverage);
+        //console.log(i + " " + locAverage);
 
         if(mapNum == 1)
         {
             marker = L.marker([point.latitude, point.longitude]);
             marker.bindTooltip(json.results[i].location + "</br> Average: <b>" + locAverage + "</b> micrograms / cubic meter").openTooltip();
-
-            marker.addTo(map1);
+        
+            marker.addTo(map1markerLayer);
         }
         else
         {
             marker = L.marker([point.latitude, point.longitude]);
             marker.bindTooltip(json.results[i].location + "</br> Average: <b>" + locAverage + "</b> micrograms / cubic meter").openTooltip();
-
-            marker.addTo(map2);
-
+        
+            marker.addTo(map2markerLayer);
         }
     }
+    console.log("Done");
 }
 
 
