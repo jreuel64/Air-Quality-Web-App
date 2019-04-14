@@ -11,9 +11,7 @@ function Init()
             map1_lat: 44.9537,
             map1_long: -93.09, 
             map2_lat: 44.9537,
-            map2_long: -93.09,
-            title: "Air Quality App"
-                
+            map2_long: -93.09,                
         }
     });
 
