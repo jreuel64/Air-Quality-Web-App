@@ -29,9 +29,7 @@ var particles;
 
 /*
     LEFT OFF:
-        finished validating dates
-        now update loadair data to from the date range 
-            if they are null use the defauls 30 days
+
 
 */
 function Init()
@@ -45,6 +43,7 @@ function Init()
             map1_long: -93.09, 
             map2_lat: 44.9537,
             map2_long: -93.09,  
+            type: null,
             particleType: [true, true, true, true, true, true, true],
             particleMinValues: [0, 0, 0, 0, 0, 0, 0],
             minDate: null,
@@ -218,10 +217,11 @@ function loadAirData(mapNum)
     var corner2;
     var radius;
     var url;
-    var date;
+    var datefrom;
+    var dateto;
 
-    date = new Date();
-    date.setDate(date.getDate() - 30);
+    datefrom = new Date();
+    datefrom.setDate(datefrom.getDate() - 30);
     //console.log(date);
 
     if(mapNum == 1)
@@ -246,8 +246,26 @@ function loadAirData(mapNum)
     //console.log("radius: " + radius);
     //console.log(date);
 
-    url = "https://api.openaq.org/v1/measurements?coordinates=" + center.lat + "," + center.lng + "&radius=" + radius + "&date_from=" + date + "&order_by[]=location&order_by[]=date&sort[]=asc&sort[]=desc&limit=10000";
+    //build url string
+    url = "https://api.openaq.org/v1/measurements?coordinates=" + center.lat + "," + center.lng + "&radius=" + radius;
 
+    if(app.minDate == "" || app.maxDate == "")
+    {
+        url = url + "&date_from=" + datefrom
+    }
+    else
+    {
+        url = url + "&date_from=" + app.minDate + "&date_to=" + app.maxDate;
+    }
+    if(app.type != null)
+    {
+        url = url + "&parameter[]=" + app.type;
+    }
+
+    url = url +  "&order_by[]=location&order_by[]=date&sort[]=asc&sort[]=desc&limit=10000";
+
+    //url = "https://api.openaq.org/v1/measurements?coordinates=" + center.lat + "," + center.lng + "&radius=" + radius + "&date_from=" + datefrom + "&order_by[]=location&order_by[]=date&sort[]=asc&sort[]=desc&limit=10000";
+    
     console.log(url);
 
     $.getJSON(url, function(json) {
@@ -329,6 +347,7 @@ function populateMarkers(mapNum, json)
         //while at same location
         while(i < json.results.length - 1 && location == json.results[i].location)
         {
+
             row = $("<tr>");
             var c1 = $("<td>").text(location);
 
@@ -345,14 +364,17 @@ function populateMarkers(mapNum, json)
             row.append(c3);
             row.append(c4);
 
-            table.append(row);
-
             for(var j = 0; j < 7; ++j)
             {
                 if(json.results[i].parameter == particles[j])
                 {   
-                    values[j] += json.results[i].value;
-                    ++count[j];
+                    if(json.results[i].value > app.particleMinValues[j])
+                    {
+                        table.append(row);
+                        values[j] += json.results[i].value;
+                        ++count[j];
+                        break;
+                    }
                 }
             }
 
@@ -456,7 +478,6 @@ function updateFilters()
     app.particleMinValues[4] = Number($("#o3").val());
     app.particleMinValues[5] = Number($("#co").val());
     app.particleMinValues[6] = Number($("#bc").val());
-
     //console.log($("#pm25").val());
     //console.log(app.particleMinValues[1]);
     app.minDate = $("#mindate").val();
@@ -470,6 +491,7 @@ function updateFilters()
     type = $("#particleType").val();
     if( type != "none")
     {
+        app.type = type;
         for(var i = 0; i < 7; ++i)
         {
             if( type == particles[i])
@@ -484,6 +506,7 @@ function updateFilters()
     }
     else
     {
+        app.type = null;
         for(var i = 0; i < 7; ++i)
         {
             app.particleType[i] = true;
