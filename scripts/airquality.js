@@ -8,6 +8,8 @@ var map2markerLayer;
 
 var interactionTimer;
 
+var particles;
+
 /* TODO:
     Filters
         particle
@@ -36,18 +38,14 @@ function Init()
             map1_long: -93.09, 
             map2_lat: 44.9537,
             map2_long: -93.09,  
-            particleType: null,
-            pm25: null,
-            pm10: null,
-            so2: null,
-            no2: null,
-            o3: null,
-            co: null,
-            bc: null,
+            particleType: [true, true, true, true, true, true, true],
+            particleMinValues: [0, 0, 0, 0, 0, 0, 0],
             minDate: null,
             maxDate: null             
         }
     });
+
+    particles = ["pm25", "pm10", "s02", "n02", "o3", "co", "bc"];
 
     map1 = L.map("map1").setView([app.map1_lat, app.map1_long], 13); //([lat, long], zoom level)
     map2 = L.map("map2").setView([app.map2_lat, app.map2_long], 13);
@@ -203,7 +201,7 @@ function loadAirData(mapNum)
 
     url = "https://api.openaq.org/v1/measurements?coordinates=" + center.lat + "," + center.lng + "&radius=" + radius + "&date_from=" + date + "&order_by[]=location&order_by[]=date&sort[]=asc&sort[]=desc&limit=10000";
 
-    //console.log(url);
+    console.log(url);
 
     $.getJSON(url, function(json) {
         populateMarkers(mapNum, json);
@@ -238,6 +236,11 @@ function populateMarkers(mapNum, json)
     console.log(json);
     var table;
 
+    var values = [0, 0, 0, 0, 0, 0, 0];
+    var count = [0, 0, 0, 0, 0, 0, 0];
+
+    var particles = ["pm25", "pm10", "s02", "n02", "o3", "co", "bc"];
+
     if(mapNum == 1)
     {
         table = $("#map1table");
@@ -253,67 +256,99 @@ function populateMarkers(mapNum, json)
         //map2markerLayer = L.layerGroup().addTo(map2);
     }
     table.empty();
+
+    var row = $("<tr>");
+    var h1 = $("<th>").text("Location");
+    var h2 = $("<th>").text("Date");
+    var h3 = $("<th>").text("Particle");
+    var h4 = $("<th>").text("Value");
+
+    row.append(h1);
+    row.append(h2);
+    row.append(h3);
+    row.append(h4);
+
+    table.append(row);
+
+    //for all results
     for(var i = 0; i < json.results.length - 1; ++i)
     {
         var location = json.results[i].location;
         var point = json.results[i].coordinates;
-        var locAverage = json.results[i].value;
-        var count = 0;
 
-        var row = $("<tr>");
-        var c1 = $("<td>").text(location);
-
-        var measurementDate = new Date(json.results[i].date.local);
-        var c2 = $("<td>").text((measurementDate.getMonth()+1) + "-" + measurementDate.getDate() + "-" + measurementDate.getFullYear());
-
-        var c3 = $("<td>").text(json.results[i].value);
-        c3.addClass("c3");
-
-        row.append(c1);
-        row.append(c2);
-        row.append(c3);
-
-        table.append(row);
+        values = [0, 0, 0, 0, 0, 0, 0];
+        count = [0, 0, 0, 0, 0, 0, 0];
 
         //while at same location
-        while(i < json.results.length - 1 && location == json.results[i+1].location)
+        while(i < json.results.length - 1 && location == json.results[i].location)
         {
-            locAverage = locAverage + json.results[i+1].value;
-         
-            var row = $("<tr>");
+            row = $("<tr>");
             var c1 = $("<td>").text(location);
 
-            var measurementDate = new Date(json.results[i+1].date.local);
+            var measurementDate = new Date(json.results[i].date.local);
             var c2 = $("<td>").text((measurementDate.getMonth()+1) + "-" + measurementDate.getDate() + "-" + measurementDate.getFullYear());
        
-            var c3 = $("<td>").text(json.results[i+1].value);
-            c3.addClass("c3");
+            var c3 = $("<td>").text(json.results[i].parameter);
+
+            var c4 = $("<td>").text(json.results[i].value);
+
 
             row.append(c1);
             row.append(c2);
             row.append(c3);
+            row.append(c4);
 
             table.append(row);
 
+            for(var j = 0; j < 7; ++j)
+            {
+                if(json.results[i].parameter == particles[j])
+                {   
+                    values[j] += json.results[i].value;
+                    ++count[j];
+                }
+            }
+
             ++i;
-            ++count;
         }
 
-        locAverage = (locAverage / count).toFixed(2);
-        //console.log(i + " " + locAverage);
+        //calculate averages
+        for(var j = 0; j < 7; ++j)
+        {
+            if(count[j] == 0)
+            {
+                values[j] = "NA";
+            }
+            else
+            {
+                values[j] = (values[j] / count[j]).toFixed(2);
+            }
+        }
 
-        if(mapNum == 1)
+        //generate html tooltip string
+        var tooltipStr = "";
+        for(var j = 0; j < 7; ++j)
+        {   
+            if(app.particleType[j] && values[j] != "NA" && values[j] > app.particleMinValues[j])
+            {
+                tooltipStr = tooltipStr + "</br>" + particles[j] + ": <b>" + values[j] + "</b> &mu; / m^3"
+            }
+        }
+
+        if(mapNum == 1 && tooltipStr != "")
         {
             marker = L.marker([point.latitude, point.longitude]);
-            marker.bindTooltip(json.results[i].location + "</br> Average: <b>" + locAverage + "</b> micrograms / cubic meter").openTooltip();
-        
+            marker.bindTooltip(location + tooltipStr).openTooltip();
+                
+            //if meet parameters
             marker.addTo(map1markerLayer);
         }
-        else
+        else if(tooltipStr != "")
         {
             marker = L.marker([point.latitude, point.longitude]);
-            marker.bindTooltip(json.results[i].location + "</br> Average: <b>" + locAverage + "</b> micrograms / cubic meter").openTooltip();
-        
+            marker.bindTooltip(location + tooltipStr).openTooltip();
+              
+            //if meet parameters
             marker.addTo(map2markerLayer);
         }
     }
@@ -347,19 +382,46 @@ function reloadMapView(mapNum)
     }
 }
 
+function submitFilters()
+{
+    updateFilters();
+    loadAirData(1);
+    loadAirData(2);
+}
+
 function updateFilters()
 {
-    app.particleType = $("#particleType").val();
-    app.pm25 = $("#pm25").val();
-    app.pm10 = $("#pm10").val();
-    app.so2 = $("#so2").val();
-    app.no2 = $("#no2").val();
-    app.o3 = $("#o3").val();
-    app.co = $("#co").val();
-    app.bc = $("#bc").val();
+    app.particleMinValues[0] = $("#pm25").val();
+    app.particleMinValues[1] = $("#pm10").val();
+    app.particleMinValues[2] = $("#so2").val();
+    app.particleMinValues[3] = $("#no2").val();
+    app.particleMinValues[4] = $("#o3").val();
+    app.particleMinValues[5] = $("#co").val();
+    app.particleMinValues[6] = $("#bc").val();
 
     app.minDate = $("#mindate").val();
     app.maxDate = $("#maxdate").val();
 
-    console.log(app.maxDate);
+    type = $("#particleType").val();
+    if( type != "none")
+    {
+        for(var i = 0; i < 7; ++i)
+        {
+            if( type == particles[i])
+            {
+                app.particleType[i] = true;
+            }
+            else
+            {
+                app.particleType[i] = false;
+            }
+        }
+    }
+    else
+    {
+        for(var i = 0; i < 7; ++i)
+        {
+            app.particleType[i] = true;
+        }
+    }
 }

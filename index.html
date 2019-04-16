@@ -71,10 +71,13 @@
                         <td><input type="number" step=".01" min="0" id="bc"/></td>
                     </tr>
                     <tr>
-                        <td class="firstColumn">Date Range: </td>
+                        <td class="firstColumn">Date Range:</td>
                         <td><input type="date" id="mindate"/></td>
                         <td> to </td>
                         <td><input type="date" id="maxdate"/></td>
+                    </tr>
+                    <tr>
+                        <td colspan=2> <button onclick="submitFilters()"> Submit Filter</button>
                     </tr>
                 </table>
 
@@ -136,22 +139,12 @@
 
             <div id="map1values">
                 <table id="map1table" class="maptable">
-                    <tr>
-                        <th>Location</th>
-                        <th>Date</th>
-                        <th>Value</th>
-                    </tr>
-
+ 
                 </table>
             </div>
             <div id="map2values">
                 <table id="map2table" class="maptable">
-                    <tr>
-                        <th>Location</th>
-                        <th>Date</th>
-                        <th>Value</th>
-                    </tr>
-                    
+
                 </table>
             </div>
     </div>
