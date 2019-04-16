@@ -12,8 +12,7 @@ var particles;
 
 /* TODO:
     Filters
-        particle
-        measurement values
+
         select data time range within last 90 days
 
     Search by location name with nominatim
@@ -329,9 +328,13 @@ function populateMarkers(mapNum, json)
         var tooltipStr = "";
         for(var j = 0; j < 7; ++j)
         {   
-            if(app.particleType[j] && values[j] != "NA" && values[j] > app.particleMinValues[j])
-            {
-                tooltipStr = tooltipStr + "</br>" + particles[j] + ": <b>" + values[j] + "</b> &mu; / m^3"
+
+            if(app.particleType[j] && values[j] != "NA" && values[j] >= app.particleMinValues[j])
+            {   
+                console.log(values[j] >= app.particleMinValues[j]);
+                console.log(values[j] + " > " + app.particleMinValues[j]);
+
+                tooltipStr = tooltipStr + "</br>" + particles[j] + ": <b>" + values[j] + "</b> &mu; / m^3";
             }
         }
 
@@ -391,14 +394,16 @@ function submitFilters()
 
 function updateFilters()
 {
-    app.particleMinValues[0] = $("#pm25").val();
-    app.particleMinValues[1] = $("#pm10").val();
-    app.particleMinValues[2] = $("#so2").val();
-    app.particleMinValues[3] = $("#no2").val();
-    app.particleMinValues[4] = $("#o3").val();
-    app.particleMinValues[5] = $("#co").val();
-    app.particleMinValues[6] = $("#bc").val();
+    app.particleMinValues[0] = Number($("#pm25").val());
+    app.particleMinValues[1] = Number($("#pm10").val());
+    app.particleMinValues[2] = Number($("#so2").val());
+    app.particleMinValues[3] = Number($("#no2").val());
+    app.particleMinValues[4] = Number($("#o3").val());
+    app.particleMinValues[5] = Number($("#co").val());
+    app.particleMinValues[6] = Number($("#bc").val());
 
+    //console.log($("#pm25").val());
+    console.log(app.particleMinValues[1]);
     app.minDate = $("#mindate").val();
     app.maxDate = $("#maxdate").val();
 
