@@ -26,6 +26,14 @@ var particles;
     Allow either map along with input location box to go full screen
 
 */
+
+/*
+    LEFT OFF:
+        finished validating dates
+        now update loadair data to from the date range 
+            if they are null use the defauls 30 days
+
+*/
 function Init()
 {
     app = new Vue({
