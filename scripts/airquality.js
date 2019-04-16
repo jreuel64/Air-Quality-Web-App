@@ -11,20 +11,13 @@ var interactionTimer;
 var particles;
 
 /* TODO:
-    Filters
-
-        select data time range within last 90 days
-
-    Search by location name with nominatim
-        update search box name based on map scroll
-
+ 
     Style background color of particle values to match epa air quality index
         legend for colors
 
     Heatmap visualization when one particle selected
 
     Allow either map along with input location box to go full screen
-
 */
 
 /*
@@ -102,9 +95,11 @@ function Init()
         clearTimeout(interactionTimer);});
 
     map1.on("moveend", function(){
-        interactionTimer = setTimeout(()=>{loadAirData(1)}, 500);});
+        interactionTimer = setTimeout(()=>{loadAirData(1)}, 500);
+        loadNewLocation(1);});
     map2.on("moveend", function(){
-        interactionTimer = setTimeout(()=>{loadAirData(2)}, 500);});
+        interactionTimer = setTimeout(()=>{loadAirData(2)}, 500);
+        loadNewLocation(2);});
 
     var today = new Date();
     var dd = today.getDate();
@@ -161,8 +156,8 @@ function mapSubmitLongLat(mapNum)
         lat = $("#loc1Lat").val();
         long = $("#loc1Long").val();
 
-        console.log("mapnum is 1");
-        console.log("lat: " + lat + " long: " + long);
+        //console.log("mapnum is 1");
+        //console.log("lat: " + lat + " long: " + long);
 
         if(latLongIsValid(lat, long))
         {
@@ -174,7 +169,7 @@ function mapSubmitLongLat(mapNum)
         }
         else
         {
-            alert("ERROR: Latitude or Longitude is out of range.");
+            alert("ERROR: Invalid Latitude or Longitude.");
             //$("#loc1Lat").val("");
             //$("#loc1Long").val("");
         }
@@ -184,8 +179,8 @@ function mapSubmitLongLat(mapNum)
         lat = $("#loc2Lat").val();
         long = $("#loc2Long").val();
 
-        console.log("mapnum is 2");
-        console.log("lat: " + lat + " long: " + long);
+       //console.log("mapnum is 2");
+       //console.log("lat: " + lat + " long: " + long);
 
         if(latLongIsValid(lat, long))
         {
@@ -196,13 +191,60 @@ function mapSubmitLongLat(mapNum)
         }
         else
         {
-            alert("ERROR: Latitude or Longitude is out of range.");
+            alert("ERROR: Invalid Latitude or Longitude.");
             //$("#loc2Lat").val("");
             //$("#loc2Long").val("");
         }
     }
 
     loadAirData(mapNum);
+}
+
+function mapSubmitName(mapNum)
+{
+    console.log("Entered MapSubmitLongLat(mapNum)");
+
+    var locationName;
+
+    if(mapNum == 1)
+    {
+        locationName = $("#loc1Name").val();
+    }
+    else
+    {
+        locationName = $("#loc2Name").val();
+    }
+
+    //console.log(locationName);
+
+    var url = "https://nominatim.openstreetmap.org/search?q=" + locationName + "&format=json&accept-language=en";
+
+    //console.log(url);
+
+    $.getJSON(url, function(json) {
+        //check if got result
+        //console.log(json);
+
+        if(json.length == 0)
+        {
+            alert("ERROR: could not find location");
+        }
+        else
+        {
+            if(mapNum == 1)
+            {
+                app.map1_lat = json[0].lat;
+                app.map1_long = json[0].lon;
+                reloadMapView(1);
+            }
+            else
+            {
+                app.map2_lat = json[0].lat;
+                app.map2_long = json[0].lon;
+                reloadMapView(2);
+            }
+        }
+    });
 }
 
 function loadAirData(mapNum)
@@ -266,7 +308,7 @@ function loadAirData(mapNum)
 
     //url = "https://api.openaq.org/v1/measurements?coordinates=" + center.lat + "," + center.lng + "&radius=" + radius + "&date_from=" + datefrom + "&order_by[]=location&order_by[]=date&sort[]=asc&sort[]=desc&limit=10000";
     
-    console.log(url);
+    //console.log(url);
 
     $.getJSON(url, function(json) {
         populateMarkers(mapNum, json);
@@ -402,7 +444,7 @@ function populateMarkers(mapNum, json)
             if(app.particleType[j] && values[j] != "NA" && values[j] >= app.particleMinValues[j])
             {   
                 //console.log(values[j] >= app.particleMinValues[j]);
-               // console.log(values[j] + " > " + app.particleMinValues[j]);
+                //console.log(values[j] + " > " + app.particleMinValues[j]);
 
                 tooltipStr = tooltipStr + "</br>" + particles[j] + ": <b>" + values[j] + "</b> &mu; / m^3";
             }
@@ -431,6 +473,10 @@ function populateMarkers(mapNum, json)
 
 function latLongIsValid(lat, long)
 {
+    if(isNaN(lat) || isNaN(long))
+    {
+        return false;
+    }
     if(lat > 90 || lat < -90)
     {
         return false;
@@ -516,6 +562,71 @@ function updateFilters()
     return true;
 }
 
+function loadNewLocation(mapNum)
+{
+    console.log("searching for new location");
+    var lat;
+    var lon;
+
+    if(mapNum == 1)
+    {
+        lat = app.map1_lat;
+        lon = app.map1_long;
+    }
+    else
+    {
+        lat = app.map2_lat;
+        lon = app.map2_long;
+    }
+
+    url = "https://nominatim.openstreetmap.org/reverse?lat=" + lat + "&lon=" + lon + "&zoom=10&format=json&accept-language=en";
+
+    //console.log(url);
+
+    $.getJSON(url, function(json) {
+        //console.log(json);
+
+        if(json.error == "Unable to geocode")
+        {
+            //cant find name
+            if(mapNum == 1)
+            {
+                app.map1_name = "Unknown";
+            }
+            else
+            {
+                app.map2_name = "Unknown";
+            }
+
+        }
+        else if(json.address.city != undefined)
+        {
+            if(mapNum == 1)
+            {
+                app.map1_name = json.address.city;
+            }
+            else
+            {
+                app.map2_name = json.address.city;
+            }
+        }
+        else if(json.address.county != undefined)
+        {
+            if(mapNum == 1)
+            {
+                app.map1_name = json.address.county;
+            }
+            else
+            {
+                app.map2_name = json.address.county;
+            }
+        }
+
+    });
+
+
+}
+
 function validDates()
 {
     var today = new Date();
@@ -537,7 +648,7 @@ function validDates()
     //if both null -> fine
     if(app.minDate == "" && app.maxDate == "")
     {
-        console.log("both dates null");
+        //console.log("both dates null");
         return true;
     }
     //if one null but the other is not
@@ -546,7 +657,7 @@ function validDates()
         app.minDate == "";
         app.maxDate == "";
         var nullDate = new Date();
-        console.log(nullDate);
+        //console.log(nullDate);
 
         return false;
     }
@@ -564,8 +675,8 @@ function validDates()
     }
 
     //if maxDate is in the future
-    console.log("today: " + today + "  max: " + app.maxDate);
-    console.log(today < app.maxDate);
+    //console.log("today: " + today + "  max: " + app.maxDate);
+    //console.log(today < app.maxDate);
 
     if( today < app.maxDate )
     {
