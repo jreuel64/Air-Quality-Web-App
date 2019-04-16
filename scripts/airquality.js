@@ -99,6 +99,46 @@ function Init()
     map2.on("moveend", function(){
         interactionTimer = setTimeout(()=>{loadAirData(2)}, 500);});
 
+    var today = new Date();
+    var dd = today.getDate();
+    var mm = today.getMonth() + 1;
+    var yyyy = today.getFullYear();
+
+    if(dd<10)
+    {
+        dd='0'+dd
+    } 
+    if(mm<10)
+    {
+        mm='0'+mm
+    } 
+
+    today = yyyy + '-' + mm + '-' + dd;
+
+    var prevdate = new Date()
+    prevdate.setDate(prevdate.getDate() - 90);
+
+    dd = prevdate.getDate();
+    mm = prevdate.getMonth() + 1;
+    yyyy = prevdate.getFullYear();
+
+    if(dd<10)
+    {
+        dd='0'+dd
+    } 
+    if(mm<10)
+    {
+        mm='0'+mm
+    }
+
+    prevdate = yyyy + '-' + mm + '-' + dd;
+
+    $('#mindate').attr('min', prevdate);
+    $('#mindate').attr('max', today);
+    $('#maxdate').attr('min', prevdate);
+    $('#maxdate').attr('max', today);
+
+
     loadAirData(1);
     loadAirData(2);
 }
@@ -331,8 +371,8 @@ function populateMarkers(mapNum, json)
 
             if(app.particleType[j] && values[j] != "NA" && values[j] >= app.particleMinValues[j])
             {   
-                console.log(values[j] >= app.particleMinValues[j]);
-                console.log(values[j] + " > " + app.particleMinValues[j]);
+                //console.log(values[j] >= app.particleMinValues[j]);
+               // console.log(values[j] + " > " + app.particleMinValues[j]);
 
                 tooltipStr = tooltipStr + "</br>" + particles[j] + ": <b>" + values[j] + "</b> &mu; / m^3";
             }
@@ -387,11 +427,18 @@ function reloadMapView(mapNum)
 
 function submitFilters()
 {
-    updateFilters();
-    loadAirData(1);
-    loadAirData(2);
+    if(updateFilters())
+    {
+        loadAirData(1);
+        loadAirData(2);
+    }
+    else
+    {
+        alert("ERROR: invalid date range");
+    }
 }
 
+//returns true if all updated and valid else false
 function updateFilters()
 {
     app.particleMinValues[0] = Number($("#pm25").val());
@@ -403,9 +450,14 @@ function updateFilters()
     app.particleMinValues[6] = Number($("#bc").val());
 
     //console.log($("#pm25").val());
-    console.log(app.particleMinValues[1]);
+    //console.log(app.particleMinValues[1]);
     app.minDate = $("#mindate").val();
     app.maxDate = $("#maxdate").val();
+
+    if(validDates() == false)
+    {
+        return false;
+    }
 
     type = $("#particleType").val();
     if( type != "none")
@@ -429,4 +481,65 @@ function updateFilters()
             app.particleType[i] = true;
         }
     }
+
+    return true;
+}
+
+function validDates()
+{
+    var today = new Date();
+    var dd = today.getDate();
+    var mm = today.getMonth() + 1;
+    var yyyy = today.getFullYear();
+
+    if(dd<10)
+    {
+        dd='0'+dd
+    } 
+    if(mm<10)
+    {
+        mm='0'+mm
+    } 
+
+    today = yyyy + '-' + mm + '-' + dd;
+
+    //if both null -> fine
+    if(app.minDate == "" && app.maxDate == "")
+    {
+        console.log("both dates null");
+        return true;
+    }
+    //if one null but the other is not
+    else if(app.minDate == "" || app.maxDate == "")
+    {
+        app.minDate == "";
+        app.maxDate == "";
+        var nullDate = new Date();
+        console.log(nullDate);
+
+        return false;
+    }
+
+    //min date large than max date
+    if( app.minDate > app.maxDate )
+    {
+        return false;
+    }
+
+    //more than 90 days in the past
+    if( (today - app.minDate) > 90 )
+    {
+        return false;
+    }
+
+    //if maxDate is in the future
+    console.log("today: " + today + "  max: " + app.maxDate);
+    console.log(today < app.maxDate);
+
+    if( today < app.maxDate )
+    {
+        return false;
+    }
+
+    return true;
 }

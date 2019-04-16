@@ -73,6 +73,7 @@ li {
 .tableHeader{
     text-align: center;
     font-size: 2rem;
+    padding-bottom: 2rem;
 }
 .firstColumn{
     text-align: right;
