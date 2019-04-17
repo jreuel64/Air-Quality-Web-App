@@ -45,22 +45,15 @@ li {
     float: left;
     font-size: 2rem;
     margin-top: 5rem;
+    width: 50%;
 }
 
 #map2LocationInfo{
     float: right;
     font-size: 2rem;
     margin-top: 5rem;
+    width: 50%;
 }
-
-#map1{
-    float: left;
-}
-
-#map2{
-    float: right;
-}
-
 #map1values{
     float: left;
     width: 50%;
@@ -68,6 +61,19 @@ li {
 #map2values{
     float: right;
     width: 50%
+}
+#map1{
+    width: 99%
+}
+#map2{
+    width: 99%
+}
+
+#map1fullscreen{
+    float: left;
+}
+#map2fullscreen{
+    float: right;
 }
 #colorkey table td{
     font-size: 1.2rem;

@@ -22,7 +22,6 @@ var units;
 
     Heatmap visualization when one particle selected
 
-    Allow either map along with input location box to go full screen
 */
 
 /*
@@ -717,4 +716,85 @@ function validDates()
     }
 
     return true;
+}
+
+function fullscreen(mapNum)
+{
+    console.log("going fullscreen");
+    var mapsection
+    var map;
+    var everythingelse;
+    if(mapNum == 1)
+    {
+        mapsection = $("#map1LocationInfo");
+        map = $("#map1");
+        everythingelse = $(".hideable:not(#map1LocationInfo)")
+    }
+    else
+    {
+        mapsection = $("#map2LocationInfo");
+        map = $("#map2");
+        everythingelse = $(".hideable:not(#map2LocationInfo)")
+    }
+
+    everythingelse.hide();
+
+    mapsection.css({
+        position: 'fixed',
+        top: 0,
+        right: 0,
+        bottom: 0,
+        left: 0,
+        zIndex: 999,
+        width: "80%"
+    });
+
+    var exit = $("<button>").text("exit");
+
+
+
+    exit.css({
+        position: 'fixed',
+        top: 10,
+        right: 10,
+        zIndex: 999
+    });
+
+    $("body").append(exit);
+
+    if(mapNum == 1)
+    {
+        setTimeout(function(){ map1.invalidateSize()}, 200);
+    }
+    else
+    {
+        setTimeout(function(){ map2.invalidateSize()}, 200);
+    }
+
+    exit.on('click', function(){
+
+        mapsection.removeAttr("style");
+        if(mapNum == 1)
+        {
+            mapsection.css({
+                float: "left",
+                fontSize: "2rem",
+                marginTop: "5rem",
+                width: "50%"
+            });
+        }
+        else
+        {
+            mapsection.css({
+                float: "right",
+                fontSize: "2rem",
+                marginTop: "5rem",
+                width: "50%"
+            });
+        }
+
+        everythingelse.show();
+        exit.remove();
+
+    });
 }

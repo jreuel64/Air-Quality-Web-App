@@ -24,8 +24,8 @@
 </head>
 <body onload="Init()">
     <div id="app">
-        <h1> Air Quality Search <h1>
-            <div id="filters">
+        <h1 class="hideable"> Air Quality Search <h1>
+            <div id="filters" class="hideable">
                 <table>
                     <tr>
                         <th class="tableHeader" colspan=3>Filter By:</th>
@@ -83,7 +83,7 @@
                 </table>
 
             </div>
-        	<div id="map1LocationInfo">
+        	<div id="map1LocationInfo" class="hideable">
         		<p><table>
                     <tr>
                         <th class="tableHeader" colspan=3> Map 1 </th>
@@ -103,9 +103,13 @@
                         <td><button onclick="mapSubmitLongLat(1)"> Submit </button></td>
                     </tr>
                 </table></p>
+
+                <div id="map1">
+
+                </div>
         	</div>
 
-            <div id="map2LocationInfo">
+            <div id="map2LocationInfo" class="hideable">
                 <p><table>
                     <tr>
                         <th class="tableHeader" colspan=3> Map 2 </th>
@@ -125,20 +129,22 @@
                         <td><button onclick="mapSubmitLongLat(2)"> Submit </button></td>
                     </tr>
                 </table></p>
+
+                <div id="map2">
+
+                </div>
             </div>
 
             <div class="clear"><br/></div>
 
-            <div id="map1">
+            <div class="clear"><br/></div>
 
-            </div>
-            <div id="map2">
-
-            </div>
+            <button class="hideable" id="map1fullscreen" onclick="fullscreen(1)"> fullscreen </button>
+            <button class="hideable" id="map2fullscreen" onclick="fullscreen(2)"> fullscreen </button>
 
             <div class="clear"><br/></div>
 
-            <div id = "colorkey">
+            <div id = "colorkey" class="hideable">
                 <table>
                     <tr>
                         <th> Color </th>
@@ -183,12 +189,12 @@
 
             <div class="clear"><br/></div>
 
-            <div id="map1values">
+            <div id="map1values" class="hideable">
                 <table id="map1table" class="maptable">
  
                 </table>
             </div>
-            <div id="map2values">
+            <div id="map2values" class="hideable">
                 <table id="map2table" class="maptable">
 
                 </table>
