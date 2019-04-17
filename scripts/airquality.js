@@ -9,10 +9,15 @@ var map2markerLayer;
 var interactionTimer;
 
 var particles;
+var dangerzones;
+var dangercolors;
+var units;
 
 /* TODO:
  
-    Style background color of particle values to match epa air quality index
+
+
+    Style background color of particle values in table to match epa air quality index
         legend for colors
 
     Heatmap visualization when one particle selected
@@ -44,7 +49,18 @@ function Init()
         }
     });
 
+    dangerzones = [ [12.1, 35.5, 55.5, 150.5, 250.5],
+                    [55, 155, 255, 355, 425],
+                    [36, 76, 186, 305, 605],
+                    [54, 101, 361, 650, 1250],
+                    [.055, .124, .165, .205, .405],
+                    [4.5, 9.5, 12.5, 15.5, 30.5]];
+
+    dangercolors = [ "rgb(0, 228, 0)", "rgb(255, 255, 0)", "rgb(255, 126, 0)",
+                    "rgb(255, 0, 0)", "rgb(143, 63, 151)", "rgb(126, 0, 35)" ];
+
     particles = ["pm25", "pm10", "s02", "n02", "o3", "co", "bc"];
+    units = ["&mu; / m^3", "&mu; / m^3", "ppb", "ppb", "ppm", "ppm", "&mu; / m^3"];
 
     map1 = L.map("map1").setView([app.map1_lat, app.map1_long], 13); //([lat, long], zoom level)
     map2 = L.map("map2").setView([app.map2_lat, app.map2_long], 13);
@@ -398,22 +414,39 @@ function populateMarkers(mapNum, json)
        
             var c3 = $("<td>").text(json.results[i].parameter);
 
-            var c4 = $("<td>").text(json.results[i].value);
+            var currvalue = json.results[i].value;
+            var c4 = $("<td>").text(currvalue);
 
-
-            row.append(c1);
-            row.append(c2);
-            row.append(c3);
-            row.append(c4);
+            //c4.style.color = dangercolors[4];
 
             for(var j = 0; j < 7; ++j)
             {
                 if(json.results[i].parameter == particles[j])
                 {   
-                    if(json.results[i].value > app.particleMinValues[j])
+                    if(currvalue > app.particleMinValues[j])
                     {
+                        //find color for table value
+                        for(var k = 0; k < 5; ++k)
+                        {
+
+                            if(currvalue < dangerzones[j][k])
+                            {
+                                c4.css("background-color", dangercolors[k]);
+                                break;
+                            }
+                            if( k == 4 )
+                            {
+                                c4.css("background-color", dangercolors[5]);
+                            }
+                        }
+
+                        row.append(c1);
+                        row.append(c2);
+                        row.append(c3);
+                        row.append(c4);
+
                         table.append(row);
-                        values[j] += json.results[i].value;
+                        values[j] += currvalue;
                         ++count[j];
                         break;
                     }
@@ -446,7 +479,7 @@ function populateMarkers(mapNum, json)
                 //console.log(values[j] >= app.particleMinValues[j]);
                 //console.log(values[j] + " > " + app.particleMinValues[j]);
 
-                tooltipStr = tooltipStr + "</br>" + particles[j] + ": <b>" + values[j] + "</b> &mu; / m^3";
+                tooltipStr = tooltipStr + "</br>" + particles[j] + ": <b>" + values[j] + "</b> " + units[j];
             }
         }
 

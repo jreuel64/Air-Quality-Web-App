@@ -69,6 +69,10 @@ li {
     float: right;
     width: 50%
 }
+#colorkey table td{
+    font-size: 1.2rem;
+    padding: 1rem;
+}
 
 .tableHeader{
     text-align: center;
