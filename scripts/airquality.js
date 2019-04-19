@@ -749,6 +749,12 @@ function fullscreen(mapNum)
         width: "80%"
     });
 
+
+    map.css({
+        height: '50%'
+    });
+
+
     var exit = $("<button>").text("exit");
 
    // map.css({height: "50%"});
