@@ -15,12 +15,12 @@ var units;
 
 /* TODO:
  
-
-
     Style background color of particle values in table to match epa air quality index
         legend for colors
 
     Heatmap visualization when one particle selected
+
+    fix fullscreen
 
 */
 
@@ -751,6 +751,8 @@ function fullscreen(mapNum)
 
     var exit = $("<button>").text("exit");
 
+   // map.css({height: "50%"});
+
 
 
     exit.css({
@@ -792,6 +794,9 @@ function fullscreen(mapNum)
                 width: "50%"
             });
         }
+
+       // map.removeAttr("style");
+       // map.css({width: "99%"});
 
         everythingelse.show();
         exit.remove();
