@@ -10,6 +10,19 @@ html {
 }
 h1{
 	text-align: center;
+    font-size: 3rem;
+    font-style: bold;
+    clear: both;
+}
+h2{
+    text-align: center;
+    font-size: 2rem;
+    font-style: bold;
+    margin-top: 5rem;
+}
+a{
+    text-decoration: none;
+    color: black;
 }
 
 
@@ -27,6 +40,7 @@ li {
     width: 80%;
     height: 100%;
     background-color: #CACACA;
+    margin-top: 2rem;
 }
 
 #filters{
@@ -113,4 +127,32 @@ tr.row2>td{
     border: 1px solid black;
     padding: .5rem;
     width: 15rem;
+}
+
+.navlink{
+    font-size: 2rem;
+    float: right;
+    margin-right: 2rem;
+    margin-top: 2rem;
+    border: 1px solid black;
+}
+
+.navlink:hover{
+    color: #737373;
+    border: 1px dotted #737373;
+}
+
+.member{
+    text-align: center;
+    width: 60%;
+
+}
+.about{
+    text-align: center;
+    font-size: 1.5rem;
+}
+.profilepic{
+    width: 25%;
+    transform: rotate(90deg);
+    margin: 5rem;
 }
