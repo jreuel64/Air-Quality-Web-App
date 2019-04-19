@@ -16,17 +16,15 @@ var units;
 /* TODO:
  
     Style background color of particle values in table to match epa air quality index
-        legend for colors
+        banners with AQI descriptor when any particles unhealthy for sensitive groups
 
     Heatmap visualization when one particle selected
-
-    fix fullscreen
 
 */
 
 /*
     LEFT OFF:
-
+        
 
 */
 function Init()
@@ -59,7 +57,8 @@ function Init()
                     "rgb(255, 0, 0)", "rgb(143, 63, 151)", "rgb(126, 0, 35)" ];
 
     particles = ["pm25", "pm10", "s02", "n02", "o3", "co", "bc"];
-    units = ["&mu; / m^3", "&mu; / m^3", "ppb", "ppb", "ppm", "ppm", "&mu; / m^3"];
+    molecularWeights = [ 0, 0, 64.066, 46.0055, 48, 28.01, 0 ];
+    units = ["&mu;" + "g/ m^3", "&mu;" + "g/ m^3", "ppb", "ppb", "ppm", "ppm", "&mu;" + "g/ m^3"];
 
     map1 = L.map("map1").setView([app.map1_lat, app.map1_long], 13); //([lat, long], zoom level)
     map2 = L.map("map2").setView([app.map2_lat, app.map2_long], 13);
@@ -155,6 +154,7 @@ function Init()
     $('#maxdate').attr('min', prevdate);
     $('#maxdate').attr('max', today);
 
+    //console.log(ugm3Toppm(89, 4));
 
     loadAirData(1);
     loadAirData(2);
@@ -414,14 +414,70 @@ function populateMarkers(mapNum, json)
             var c3 = $("<td>").text(json.results[i].parameter);
 
             var currvalue = json.results[i].value;
-            var c4 = $("<td>").text(currvalue);
-
-            //c4.style.color = dangercolors[4];
+            var c4 = $("<td>");
 
             for(var j = 0; j < 7; ++j)
-            {
+            {   
                 if(json.results[i].parameter == particles[j])
                 {   
+                    //check units
+                    //unit is ppb
+
+                    if(json.results[i].unit == "ppb")
+                    {
+                        if(units[j] == "&mu;" + "g/ m^3")
+                        {
+                            //convert ppb to ugm3
+                            currvalue = ppbToumg3(currvalue, j);
+                        }
+                        else if(units[j] == "ppb")
+                        {
+                            //do nothing
+                        }
+                        else
+                        {
+                            //convert ppb to ppm
+                            currvalue = currValue / 1000
+                        }
+                    }
+                    //unit is ppm
+                    else if(json.results[i].unit == "ppm")
+                    {
+                        if(units[j] == "&mu;" + "g/ m^3")
+                        {
+                            //convert ppm to ugm3
+                            currvalue = ppmTougm3(currvalue, j);
+                        }
+                        else if(units[j] == "ppb")
+                        {
+                            //convert ppm to ppb
+                            currvalue = currvalue * 1000
+                        }
+                        else
+                        {
+                            //do nothing
+                        }
+                    }
+                    //unit is umg3
+                    else
+                    {
+                        if(units[j] == "&mu;" + "g/ m^3")
+                        {
+                            //do nothing
+                        }
+                        else if(units[j] == "ppb")
+                        {
+                            //convert ugm3 to ppb
+                            currvalue = ugm3Toppb(currvalue, j);
+                        }
+                        else
+                        {
+                            //convert ugm3 to ppm
+                            currvalue = ugm3Toppm(currvalue, j);
+                        }
+                    }
+
+
                     if(currvalue > app.particleMinValues[j])
                     {
                         //find color for table value
@@ -438,6 +494,8 @@ function populateMarkers(mapNum, json)
                                 c4.css("background-color", dangercolors[5]);
                             }
                         }
+
+                        c4.html(currvalue.toFixed(2) + " " + units[j]);
 
                         row.append(c1);
                         row.append(c2);
@@ -757,10 +815,6 @@ function fullscreen(mapNum)
 
     var exit = $("<button>").text("exit");
 
-   // map.css({height: "50%"});
-
-
-
     exit.css({
         position: 'fixed',
         top: 10,
@@ -801,11 +855,64 @@ function fullscreen(mapNum)
             });
         }
 
-       // map.removeAttr("style");
-       // map.css({width: "99%"});
+        map.css("height", "");
 
         everythingelse.show();
         exit.remove();
 
     });
+}
+
+//ppm = 24.45 x concentration (mg/m3/molecular weight \
+//ppb = 24.45 X (value / molecular weight)  
+
+function ppbToumg3(value, particleNum)
+{
+    var weight = molecularWeights[particleNum];
+
+    if( weight == 0 )
+    {
+        return value;
+    }
+
+    return .0409 * ( value / weight );
+}
+function umg3Toppb(value, particleNum)
+{
+    var weight = molecularWeights[particleNum];
+
+    if( weight == 0 )
+    {
+        return value;
+    }
+
+    return 24.45 * ( value / weight );
+}
+
+function ppmTougm3(value, particleNum)
+{   
+    var weight = molecularWeights[particleNum];
+
+    if( weight == 0 )
+    {
+        return value;
+    }
+
+    var mg3 = .0409 * ( value / weight )
+
+    return mg3 * 1000;
+}
+
+//working
+function ugm3Toppm(value, particleNum)
+{
+    var weight = molecularWeights[particleNum];
+    value = value / 1000
+
+    if( weight == 0 )
+    {
+        return value;
+    }
+
+    return ( (value) / weight ) * 24.45
 }
