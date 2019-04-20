@@ -154,6 +154,18 @@ function Init()
     $('#maxdate').attr('min', prevdate);
     $('#maxdate').attr('max', today);
 
+    $('.button').click(function() {
+        $.ajax({
+            url: "",
+            context: document.body,
+            success: function(s,x){
+
+                $('html[manifest=saveappoffline.appcache]').attr('content', '');
+                    $(this).html(s);
+            }
+        }); 
+    });
+
     //console.log(ugm3Toppm(89, 4));
 
     loadAirData(1);
@@ -323,7 +335,7 @@ function loadAirData(mapNum)
 
     //url = "https://api.openaq.org/v1/measurements?coordinates=" + center.lat + "," + center.lng + "&radius=" + radius + "&date_from=" + datefrom + "&order_by[]=location&order_by[]=date&sort[]=asc&sort[]=desc&limit=10000";
     
-    //console.log(url);
+    console.log(url);
 
     $.getJSON(url, function(json) {
         populateMarkers(mapNum, json);
