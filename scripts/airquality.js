@@ -6,6 +6,9 @@ var map2;
 var map1markerLayer;
 var map2markerLayer;
 
+var map1heatLayer;
+var map2heatLayer;
+
 var interactionTimer;
 
 var particles;
@@ -41,6 +44,7 @@ function Init()
             map2_lat: 44.9537,
             map2_long: -93.09,  
             type: null,
+            heatMapActive: true,
             particleType: [true, true, true, true, true, true, true],
             particleMinValues: [0, 0, 0, 0, 0, 0, 0],
             minDate: null,
@@ -66,6 +70,10 @@ function Init()
 
     map1markerLayer = L.layerGroup().addTo(map1);
     map2markerLayer = L.layerGroup().addTo(map2);
+
+
+    map1heatLayer = L.heatLayer([], {radius: 25}).addTo(map1);
+    map2heatLayer = L.heatLayer([], {radius: 25}).addTo(map2);
 
     L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
     attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
@@ -158,6 +166,7 @@ function Init()
 
     loadAirData(1);
     loadAirData(2);
+
 }
 
 function mapSubmitLongLat(mapNum)
@@ -328,6 +337,8 @@ function loadAirData(mapNum)
     $.getJSON(url, function(json) {
         populateMarkers(mapNum, json);
     });
+
+    
 }
 
 function getRadius(corner1, corner2)
@@ -398,6 +409,7 @@ function populateMarkers(mapNum, json)
         var location = json.results[i].location;
         var point = json.results[i].coordinates;
 
+
         values = [0, 0, 0, 0, 0, 0, 0];
         count = [0, 0, 0, 0, 0, 0, 0];
 
@@ -417,6 +429,24 @@ function populateMarkers(mapNum, json)
             var c4 = $("<td>").text(currvalue);
 
             //c4.style.color = dangercolors[4];
+
+
+            //Add heatmap
+            if( app.heatMapActive )
+            {
+                //Get map heat layer
+                if( mapNum == 1 ){ curHeatLayer = map1heatLayer; }
+                else{ curHeatLayer = map2heatLayer; }
+
+                if ( currvalue > 1.0 ){ mapValue = 1.0; }
+                else{ mapValue = currvalue }
+
+                curHeatLayer.addLatLng([point.latitude, point.longitude, mapValue]);
+
+
+                //console.log("made it");
+            }
+
 
             for(var j = 0; j < 7; ++j)
             {
@@ -482,6 +512,7 @@ function populateMarkers(mapNum, json)
             }
         }
 
+        //Add marker
         if(mapNum == 1 && tooltipStr != "")
         {
             marker = L.marker([point.latitude, point.longitude]);
@@ -655,6 +686,9 @@ function loadNewLocation(mapNum)
         }
 
     });
+
+
+
 
 
 }
