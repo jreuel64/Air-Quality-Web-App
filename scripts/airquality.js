@@ -85,7 +85,8 @@ function Init()
     map1heatLayer = L.heatLayer([], {
                         radius: 100, 
                         minOpacity: .25,
-                        
+                        max: 1,
+                        maxZoom: 1,
                         gradient: {
                             .167: "rgb(0, 153, 0)", 
                             .33: "rgb(255, 255, 0)",
