@@ -18,12 +18,12 @@ var units;
 
 /* TODO:
  
-    Style background color of particle values in table to match epa air quality index
-        legend for colors
 
     Heatmap visualization when one particle selected
+        add heatmap only when heatMapSelected is true
+        and fix colors for particles to match AQI index scale
 
-    fix fullscreen
+
 
 */
 
@@ -60,11 +60,20 @@ function Init()
                     [.055, .124, .165, .205, .405],
                     [4.5, 9.5, 12.5, 15.5, 30.5]];
 
+    hmcolorzones = [ .167, .33, .50, .67, .84, 1.0 ];
+
     dangercolors = [ "rgb(0, 228, 0)", "rgb(255, 255, 0)", "rgb(255, 126, 0)",
                     "rgb(255, 0, 0)", "rgb(143, 63, 151)", "rgb(126, 0, 35)" ];
 
     particles = ["pm25", "pm10", "s02", "n02", "o3", "co", "bc"];
     units = ["&mu; / m^3", "&mu; / m^3", "ppb", "ppb", "ppm", "ppm", "&mu; / m^3"];
+
+    heatmapGradients =  [ ["12.1: dangercolors[0], 35.5: dangercolors[1], 55.5: dangercolors[2], 150.5: dangercolors[3], 250.5: dangercolors[4]"],
+                    ["55: dangercolors[0], 155: dangercolors[1], 255: dangercolors[2], 355: dangercolors[3], 425: dangercolors[4]"],
+                    ["36: dangercolors[0], 76: dangercolors[1], 186: dangercolors[2], 305: dangercolors[3], 605: dangercolors[4]"],
+                    ["54: dangercolors[0], 101: dangercolors[1], 361: dangercolors[2], 650: dangercolors[3], 1250: dangercolors[4]"],
+                    [".055: dangercolors[0], .124: dangercolors[1], .165: dangercolors[2], .205: dangercolors[3], .405: dangercolors[4]"],
+                    ["4.5: dangercolors[0], 9.5: dangercolors[1], 12.5: dangercolors[2], 15.5: dangercolors[3], 30.5: dangercolors[4]"] ];
 
     map1 = L.map("map1").setView([app.map1_lat, app.map1_long], 13); //([lat, long], zoom level)
     map2 = L.map("map2").setView([app.map2_lat, app.map2_long], 13);
@@ -73,8 +82,33 @@ function Init()
     map2markerLayer = L.layerGroup().addTo(map2);
 
 
-    map1heatLayer = L.heatLayer([], {radius: 25}).addTo(map1);
-    map2heatLayer = L.heatLayer([], {radius: 25}).addTo(map2);
+    map1heatLayer = L.heatLayer([], {
+                        radius: 100, 
+                        minOpacity: .25,
+                        
+                        gradient: {
+                            .167: "rgb(0, 153, 0)", 
+                            .33: "rgb(255, 255, 0)",
+                            .50: "rgb(255, 126, 0)",
+                            .67: "rgb(255, 0, 0)",
+                            .84: "rgb(143, 63, 151)",
+                            1.0: "rgb(126, 0, 35)",
+                        }
+                    }).addTo(map1);
+
+
+    map2heatLayer = L.heatLayer([], {
+                        radius: 100, 
+                        gradient: {
+                            .167: "rgb(0, 153, 0)", 
+                            .33: "rgb(255, 255, 0)",
+                            .50: "rgb(255, 126, 0)",
+                            .67: "rgb(255, 0, 0)",
+                            .84: "rgb(143, 63, 151)",
+                            1.0: "rgb(126, 0, 35)",
+                        }
+                    }).addTo(map2);
+
 
     L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
     attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
@@ -373,20 +407,26 @@ function populateMarkers(mapNum, json)
 
     var particles = ["pm25", "pm10", "s02", "n02", "o3", "co", "bc"];
 
+    var curHeatLayer;
+    var mapValue;
+
     if(mapNum == 1)
     {
         table = $("#map1table");
         map1markerLayer.clearLayers();
-
+        curHeatLayer = map1heatLayer;
         //map1markerLayer = L.layerGroup().addTo(map1);
     }
     else
     {
         table = $("#map2table");
         map2markerLayer.clearLayers();
+        curHeatLayer = map2heatLayer;
 
         //map2markerLayer = L.layerGroup().addTo(map2);
     }
+
+    curHeatLayer.setLatLngs([]);
     table.empty();
 
     var row = $("<tr>");
@@ -428,25 +468,23 @@ function populateMarkers(mapNum, json)
             var c4 = $("<td>").text(currvalue);
 
             //c4.style.color = dangercolors[4];
+/*
+            //add heatmap
+                    if( app.heatMapSelected )
+                    {
+                        //Get map heat layer
+                        if( mapNum == 1 ){ curHeatLayer = map1heatLayer; }
+                        else{ curHeatLayer = map2heatLayer; }
+
+                        if ( currvalue > 1.0 ){ mapValue = 1.0; }
+                        else{ mapValue = currvalue }
+
+                        curHeatLayer.addLatLng([point.latitude, point.longitude, mapValue]);
 
 
-            //Add heatmap
-            if( app.heatMapActive )
-            {
-                //Get map heat layer
-                if( mapNum == 1 ){ curHeatLayer = map1heatLayer; }
-                else{ curHeatLayer = map2heatLayer; }
-
-                if ( currvalue > 1.0 ){ mapValue = 1.0; }
-                else{ mapValue = currvalue }
-
-                curHeatLayer.addLatLng([point.latitude, point.longitude, mapValue]);
-
-
-                //console.log("made it");
-            }
-
-
+                        //console.log("made it");
+                    }
+*/
             for(var j = 0; j < 7; ++j)
             {
                 if(json.results[i].parameter == particles[j])
@@ -456,18 +494,26 @@ function populateMarkers(mapNum, json)
                         //find color for table value
                         for(var k = 0; k < 5; ++k)
                         {
-
                             if(currvalue < dangerzones[j][k])
                             {
                                 c4.css("background-color", dangercolors[k]);
+                                //mapValue = hmcolorzones[k];
                                 break;
                             }
-                            if( k == 4 )
+
+                            else if( k == 4 )
                             {
                                 c4.css("background-color", dangercolors[5]);
+                                //mapValue = 1;
                             }
                         }
-
+/*
+                        if( app.heatMapSelected )
+                        {
+                            console.log("mapValue: " + mapValue + "   currvalue: " + currvalue);
+                            curHeatLayer.addLatLng([point.latitude, point.longitude, mapValue]);
+                        }
+*/
                         row.append(c1);
                         row.append(c2);
                         row.append(c3);
@@ -501,12 +547,33 @@ function populateMarkers(mapNum, json)
         var tooltipStr = "";
         for(var j = 0; j < 7; ++j)
         {   
-
             if(app.particleType[j] && values[j] != "NA" && values[j] >= app.particleMinValues[j])
             {   
                 tooltipStr = tooltipStr + "</br>" + particles[j] + ": <b>" + values[j] + "</b> " + units[j];
             }
+
+            if(particles[j] == type)
+            {
+                for(var k = 0; k < 4; ++k)
+                {
+                    if(values[j] < dangerzones[j][k])
+                    {
+                        mapValue = hmcolorzones[k];
+                        break;
+                    }
+                    else if(k ==4)
+                    {
+                        mapValue = 1;
+                    }
+                }
+            }
         }
+
+        if( app.heatMapSelected )
+        {
+            curHeatLayer.addLatLng([point.latitude, point.longitude, mapValue]);
+        }
+
 
         //Add marker
         if(mapNum == 1 && tooltipStr != "")
