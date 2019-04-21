@@ -495,7 +495,7 @@ function populateMarkers(mapNum, json)
                     if(currvalue > app.particleMinValues[j])
                     {
                         //find color for table value
-                        for(var k = 0; k < 5; ++k)
+                        for(var k = 0; k < 4; ++k)
                         {
                             if(currvalue < dangerzones[j][k])
                             {
