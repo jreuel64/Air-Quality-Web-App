@@ -46,6 +46,7 @@ function Init()
             type: null,
             heatMapActive: true,
             particleType: [true, true, true, true, true, true, true],
+            heatMapSelected: false,
             particleMinValues: [0, 0, 0, 0, 0, 0, 0],
             minDate: null,
             maxDate: null             
@@ -337,8 +338,6 @@ function loadAirData(mapNum)
     $.getJSON(url, function(json) {
         populateMarkers(mapNum, json);
     });
-
-    
 }
 
 function getRadius(corner1, corner2)
@@ -505,9 +504,6 @@ function populateMarkers(mapNum, json)
 
             if(app.particleType[j] && values[j] != "NA" && values[j] >= app.particleMinValues[j])
             {   
-                //console.log(values[j] >= app.particleMinValues[j]);
-                //console.log(values[j] + " > " + app.particleMinValues[j]);
-
                 tooltipStr = tooltipStr + "</br>" + particles[j] + ": <b>" + values[j] + "</b> " + units[j];
             }
         }
@@ -566,14 +562,15 @@ function reloadMapView(mapNum)
 
 function submitFilters()
 {
-    if(updateFilters())
+    var filtersValid = updateFilters();
+    if(filtersValid[0])
     {
         loadAirData(1);
         loadAirData(2);
     }
     else
     {
-        alert("ERROR: invalid date range");
+        alert("ERROR: " + filtersValid[1]);
     }
 }
 
@@ -587,15 +584,16 @@ function updateFilters()
     app.particleMinValues[4] = Number($("#o3").val());
     app.particleMinValues[5] = Number($("#co").val());
     app.particleMinValues[6] = Number($("#bc").val());
-    //console.log($("#pm25").val());
-    //console.log(app.particleMinValues[1]);
+
     app.minDate = $("#mindate").val();
     app.maxDate = $("#maxdate").val();
 
     if(validDates() == false)
     {
-        return false;
+        return [false, "invalid dates"];
     }
+
+    var hmChecked = $("input:checkbox:not(:checked)").val();
 
     type = $("#particleType").val();
     if( type != "none")
@@ -612,6 +610,10 @@ function updateFilters()
                 app.particleType[i] = false;
             }
         }
+        if(hmChecked == undefined)
+        {
+            app.heatMapSelected = true;
+        }
     }
     else
     {
@@ -620,9 +622,14 @@ function updateFilters()
         {
             app.particleType[i] = true;
         }
+
+        if(hmChecked == undefined)
+        {
+            return [false, "only one particle can be selected for heatmap"];
+        }
     }
 
-    return true;
+    return [true, ""];
 }
 
 function loadNewLocation(mapNum)
