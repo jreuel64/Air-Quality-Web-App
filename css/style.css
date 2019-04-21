@@ -108,6 +108,15 @@ li {
     width: 50%;
 }
 
+#banner1{
+    float: left;
+    width: 49%;
+}
+#banner2{
+    float: right;
+    width: 49%;
+}
+
 .tableHeader{
     text-align: center;
     font-size: 2rem;

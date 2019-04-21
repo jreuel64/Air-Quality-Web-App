@@ -10,13 +10,12 @@ var interactionTimer;
 
 var particles;
 var dangerzones;
+var aqiDescriptor;
 var dangercolors;
 var units;
+var maxDanger;
 
 /* TODO:
- 
-    Style background color of particle values in table to match epa air quality index
-        banners with AQI descriptor when any particles unhealthy for sensitive groups
 
     Heatmap visualization when one particle selected
 
@@ -53,8 +52,12 @@ function Init()
                     [.055, .124, .165, .205, .405],
                     [4.5, 9.5, 12.5, 15.5, 30.5]];
 
+    aqiDescriptor = [ "Good", "Moderate", "Unhealthy for Sensitive Groups", "Unhealthy", "Very Unhealthy", "Hazardous"];
+
     dangercolors = [ "rgb(0, 228, 0)", "rgb(255, 255, 0)", "rgb(255, 126, 0)",
                     "rgb(255, 0, 0)", "rgb(143, 63, 151)", "rgb(126, 0, 35)" ];
+
+    maxDanger = 0;
 
     particles = ["pm25", "pm10", "s02", "n02", "o3", "co", "bc"];
     molecularWeights = [ 0, 0, 64.066, 46.0055, 48, 28.01, 0 ];
@@ -434,7 +437,6 @@ function populateMarkers(mapNum, json)
                 {   
                     //check units
                     //unit is ppb
-
                     if(json.results[i].unit == "ppb")
                     {
                         if(units[j] == "&mu;" + "g/ m^3")
@@ -495,7 +497,6 @@ function populateMarkers(mapNum, json)
                         //find color for table value
                         for(var k = 0; k < 5; ++k)
                         {
-
                             if(currvalue < dangerzones[j][k])
                             {
                                 c4.css("background-color", dangercolors[k]);
@@ -538,6 +539,21 @@ function populateMarkers(mapNum, json)
             }
         }
 
+        for(var j = 0; j < 6; ++j)
+        {   
+            for(var k = 0; k < 4; ++k)
+            {
+                if(values[j] < dangerzones[j][k])
+                {
+                    if( k > maxDanger)
+                    {
+                        maxDanger = k;
+                    }
+                    break;
+                }
+            }
+        }
+
         //generate html tooltip string
         var tooltipStr = "";
         for(var j = 0; j < 7; ++j)
@@ -545,9 +561,6 @@ function populateMarkers(mapNum, json)
 
             if(app.particleType[j] && values[j] != "NA" && values[j] >= app.particleMinValues[j])
             {   
-                //console.log(values[j] >= app.particleMinValues[j]);
-                //console.log(values[j] + " > " + app.particleMinValues[j]);
-
                 tooltipStr = tooltipStr + "</br>" + particles[j] + ": <b>" + values[j] + "</b> " + units[j];
             }
         }
@@ -569,6 +582,34 @@ function populateMarkers(mapNum, json)
             marker.addTo(map2markerLayer);
         }
     }
+    var bannerDiv;
+
+    if(mapNum == 1)
+    {
+        bannerDiv = $("#banner1");
+    }
+    else
+    {
+        bannerDiv = $("#banner2");
+    }
+
+    bannerDiv.empty();
+
+    console.log(bannerDiv.text());
+
+    if(maxDanger >= 2)
+    {
+        var banner = $("<p>").html("<b>!!! Air Quality in this region is:</b> <br/>" + aqiDescriptor[maxDanger]);
+        banner.css({
+            border: "1px solid black",
+            fontWeight: "normal"});
+
+        console.log(banner.text());
+
+        bannerDiv.append(banner);
+    }
+
+
     console.log("Done");
 }
 
