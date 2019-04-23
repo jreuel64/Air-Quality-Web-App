@@ -100,6 +100,9 @@ function Init()
 
     map2heatLayer = L.heatLayer([], {
                         radius: 100, 
+                        minOpacity: .25,
+                        max: 1,
+                        maxZoom: 1,
                         gradient: {
                             .167: "rgb(0, 153, 0)", 
                             .33: "rgb(255, 255, 0)",
@@ -159,13 +162,13 @@ function Init()
     map2.on("moveend", function(){
         interactionTimer = setTimeout(()=>{loadAirData(2)}, 500);
         loadNewLocation(2);});
-
+/*
     //Heatmap listener
     $('#hm').change(function() {
         var val = $("#hm")[0].checked;
         app.heatMapSelected = val;
         //false clear the layer
-    });
+    });*/
 
     var today = new Date();
     var dd = today.getDate();
