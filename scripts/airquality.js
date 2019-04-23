@@ -16,6 +16,7 @@ var dangerzones;
 var dangercolors;
 var units;
 
+
 /* TODO:
  
 
@@ -44,7 +45,6 @@ function Init()
             map2_lat: 44.9537,
             map2_long: -93.09,  
             type: null,
-            heatMapActive: true,
             particleType: [true, true, true, true, true, true, true],
             heatMapSelected: false,
             particleMinValues: [0, 0, 0, 0, 0, 0, 0],
@@ -159,6 +159,13 @@ function Init()
     map2.on("moveend", function(){
         interactionTimer = setTimeout(()=>{loadAirData(2)}, 500);
         loadNewLocation(2);});
+
+    //Heatmap listener
+    $('#hm').change(function() {
+        var val = $("#hm")[0].checked;
+        app.heatMapSelected = val;
+        //false clear the layer
+    });
 
     var today = new Date();
     var dd = today.getDate();
@@ -471,20 +478,21 @@ function populateMarkers(mapNum, json)
             //c4.style.color = dangercolors[4];
 /*
             //add heatmap
-                    if( app.heatMapSelected )
-                    {
-                        //Get map heat layer
-                        if( mapNum == 1 ){ curHeatLayer = map1heatLayer; }
-                        else{ curHeatLayer = map2heatLayer; }
+            if( app.heatMapSelected )
+            {
+                console.log("Heatmap")
+                //Get map heat layer
+                if( mapNum == 1 ){ curHeatLayer = map1heatLayer; }
+                else{ curHeatLayer = map2heatLayer; }
 
-                        if ( currvalue > 1.0 ){ mapValue = 1.0; }
-                        else{ mapValue = currvalue }
+                if ( currvalue > 1.0 ){ mapValue = 1.0; }
+                else{ mapValue = currvalue }
 
-                        curHeatLayer.addLatLng([point.latitude, point.longitude, mapValue]);
+                curHeatLayer.addLatLng([point.latitude, point.longitude, mapValue]);
 
 
-                        //console.log("made it");
-                    }
+                //console.log("made it");
+            }
 */
             for(var j = 0; j < 7; ++j)
             {
