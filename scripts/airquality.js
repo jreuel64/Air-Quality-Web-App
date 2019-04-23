@@ -10,7 +10,6 @@ var map1heatLayer;
 var map2heatLayer;
 
 var interactionTimer;
-
 var particles;
 var dangerzones;
 var aqiDescriptor;
@@ -123,21 +122,17 @@ function Init()
 
 
     map1.on("move", function() {
-        //console.log("map1 moved");
         clearTimeout(interactionTimer);
         lat=map1.getCenter().lat;
         long=map1.getCenter().lng;
-        //console.log("lat: " + lat + " long: " + long);
         app.map1_lat=lat.toFixed(5);
         app.map1_long=long.toFixed(5);
     });
 
     map2.on("move", function() {
-        //console.log("map1 moved");
         clearTimeout(interactionTimer);
         lat=map2.getCenter().lat;
         long=map2.getCenter().lng;
-        //console.log("lat: " + lat + " long: " + long);
         app.map2_lat=lat.toFixed(5);
         app.map2_long=long.toFixed(5);
     });
@@ -153,13 +148,6 @@ function Init()
     map2.on("moveend", function(){
         interactionTimer = setTimeout(()=>{loadAirData(2)}, 500);
         loadNewLocation(2);});
-/*
-    //Heatmap listener
-    $('#hm').change(function() {
-        var val = $("#hm")[0].checked;
-        app.heatMapSelected = val;
-        //false clear the layer
-    });*/
 
     var today = new Date();
     var dd = today.getDate();
@@ -212,8 +200,6 @@ function Init()
         }); 
     });
 
-    //console.log(ugm3Toppm(89, 4));
-
     loadAirData(1);
     loadAirData(2);
 
@@ -221,7 +207,6 @@ function Init()
 
 function mapSubmitLongLat(mapNum)
 {
-    console.log("Entered MapSubmitLongLat(mapNum)");
     var lat;
     var long;
 
@@ -229,9 +214,6 @@ function mapSubmitLongLat(mapNum)
     {
         lat = $("#loc1Lat").val();
         long = $("#loc1Long").val();
-
-        //console.log("mapnum is 1");
-        //console.log("lat: " + lat + " long: " + long);
 
         if(latLongIsValid(lat, long))
         {
@@ -244,17 +226,12 @@ function mapSubmitLongLat(mapNum)
         else
         {
             alert("ERROR: Invalid Latitude or Longitude.");
-            //$("#loc1Lat").val("");
-            //$("#loc1Long").val("");
         }
     }
     else
     {
         lat = $("#loc2Lat").val();
         long = $("#loc2Long").val();
-
-       //console.log("mapnum is 2");
-       //console.log("lat: " + lat + " long: " + long);
 
         if(latLongIsValid(lat, long))
         {
@@ -266,8 +243,6 @@ function mapSubmitLongLat(mapNum)
         else
         {
             alert("ERROR: Invalid Latitude or Longitude.");
-            //$("#loc2Lat").val("");
-            //$("#loc2Long").val("");
         }
     }
 
@@ -276,8 +251,6 @@ function mapSubmitLongLat(mapNum)
 
 function mapSubmitName(mapNum)
 {
-    console.log("Entered MapSubmitLongLat(mapNum)");
-
     var locationName;
 
     if(mapNum == 1)
@@ -289,15 +262,9 @@ function mapSubmitName(mapNum)
         locationName = $("#loc2Name").val();
     }
 
-    //console.log(locationName);
-
     var url = "https://nominatim.openstreetmap.org/search?q=" + locationName + "&format=json&accept-language=en";
 
-    //console.log(url);
-
     $.getJSON(url, function(json) {
-        //check if got result
-        //console.log(json);
 
         if(json.length == 0)
         {
@@ -323,8 +290,6 @@ function mapSubmitName(mapNum)
 
 function loadAirData(mapNum)
 {
-    console.log("entered loadAirData");
-
     updateFilters();
 
     var center;
@@ -338,7 +303,6 @@ function loadAirData(mapNum)
 
     datefrom = new Date();
     datefrom.setDate(datefrom.getDate() - 30);
-    //console.log(date);
 
     if(mapNum == 1)
     {
@@ -354,13 +318,7 @@ function loadAirData(mapNum)
     corner1 = bounds.getNorthWest();
     corner2 = bounds.getSouthEast();
 
-    //console.log("c1 lat: " + corner1.lat + " c1 long: " + corner1.lng);
-    //console.log("c2 lat: " + corner2.lat + " c2 long: " + corner2.lng);
-
     radius = getRadius(corner1, corner2);
-
-    //console.log("radius: " + radius);
-    //console.log(date);
 
     //build url string
     url = "https://api.openaq.org/v1/measurements?coordinates=" + center.lat + "," + center.lng + "&radius=" + radius;
@@ -379,11 +337,7 @@ function loadAirData(mapNum)
     }
 
     url = url +  "&order_by[]=location&order_by[]=date&sort[]=asc&sort[]=desc&limit=10000";
-
-    //url = "https://api.openaq.org/v1/measurements?coordinates=" + center.lat + "," + center.lng + "&radius=" + radius + "&date_from=" + datefrom + "&order_by[]=location&order_by[]=date&sort[]=asc&sort[]=desc&limit=10000";
     
-    console.log(url);
-
     $.getJSON(url, function(json) {
         populateMarkers(mapNum, json);
     });
@@ -401,8 +355,6 @@ function getRadius(corner1, corner2)
     lat2 = lat2 * Math.PI / 180;
     long2 = long2 * Math.PI / 180;
 
-    //console.log("lat1: " + lat1 + " long1: " + long1 + " lat2: " + lat2 + " long2: " + long2); 
-
     var a = Math.pow(Math.sin((lat2 - lat1) / 2), 2) + Math.cos(lat1) * Math.cos(lat2) * Math.pow(Math.sin((long2 - long1) / 2), 2);
     var c = 2 * Math.asin(Math.sqrt(a));
 
@@ -413,7 +365,6 @@ function getRadius(corner1, corner2)
 
 function populateMarkers(mapNum, json)
 {
-    console.log("populating Markers");
     console.log(json);
     var table;
 
@@ -424,21 +375,19 @@ function populateMarkers(mapNum, json)
 
     var curHeatLayer;
     var mapValue;
+    var maxDanger = 0;
 
     if(mapNum == 1)
     {
         table = $("#map1table");
         map1markerLayer.clearLayers();
         curHeatLayer = map1heatLayer;
-        //map1markerLayer = L.layerGroup().addTo(map1);
     }
     else
     {
         table = $("#map2table");
         map2markerLayer.clearLayers();
         curHeatLayer = map2heatLayer;
-
-        //map2markerLayer = L.layerGroup().addTo(map2);
     }
 
     curHeatLayer.setLatLngs([]);
@@ -547,20 +496,17 @@ function populateMarkers(mapNum, json)
                     if(currvalue > app.particleMinValues[j])
                     {
                         //find color for table value
-                        for(var k = 0; k < 4; ++k)
+                        for(var k = 0; k < 5; ++k)
                         {
                             if(currvalue < dangerzones[j][k])
                             {
                                 c4.css("background-color", dangercolors[k]);
-                                //mapValue = hmcolorzones[k];
                                 break;
                             }
-
-                            else if( k == 4 )
-                            {
-                                c4.css("background-color", dangercolors[5]);
-                                //mapValue = 1;
-                            }
+                        }
+                        if(c4.css("background-color") == "")
+                        {
+                            c4.css("background-color") == dangercolors[5];
                         }
 
                         c4.html(currvalue.toFixed(2) + " " + units[j]);
@@ -659,6 +605,7 @@ function populateMarkers(mapNum, json)
             marker.addTo(map2markerLayer);
         }
     }
+
     var bannerDiv;
 
     if(mapNum == 1)
@@ -672,8 +619,6 @@ function populateMarkers(mapNum, json)
 
     bannerDiv.empty();
 
-    console.log(bannerDiv.text());
-
     if(maxDanger >= 2)
     {
         var banner = $("<p>").html("<b>!!! Air Quality in this region is:</b> <br/>" + aqiDescriptor[maxDanger]);
@@ -681,13 +626,8 @@ function populateMarkers(mapNum, json)
             border: "1px solid black",
             fontWeight: "normal"});
 
-        console.log(banner.text());
-
         bannerDiv.append(banner);
     }
-
-
-    console.log("Done");
 }
 
 
@@ -775,6 +715,10 @@ function updateFilters()
         {
             app.heatMapSelected = true;
         }
+        else
+        {
+            app.heatMapSelected = false;
+        }
     }
     else
     {
@@ -788,6 +732,10 @@ function updateFilters()
         {
             return [false, "only one particle can be selected for heatmap"];
         }
+        else
+        {
+            app.heatMapSelected = false;
+        }
     }
 
     return [true, ""];
@@ -795,7 +743,6 @@ function updateFilters()
 
 function loadNewLocation(mapNum)
 {
-    console.log("searching for new location");
     var lat;
     var lon;
 
@@ -812,10 +759,8 @@ function loadNewLocation(mapNum)
 
     url = "https://nominatim.openstreetmap.org/reverse?lat=" + lat + "&lon=" + lon + "&zoom=10&format=json&accept-language=en";
 
-    //console.log(url);
 
     $.getJSON(url, function(json) {
-        //console.log(json);
 
         if(json.error == "Unable to geocode")
         {
@@ -854,11 +799,6 @@ function loadNewLocation(mapNum)
         }
 
     });
-
-
-
-
-
 }
 
 function validDates()
@@ -882,7 +822,6 @@ function validDates()
     //if both null -> fine
     if(app.minDate == "" && app.maxDate == "")
     {
-        //console.log("both dates null");
         return true;
     }
     //if one null but the other is not
@@ -891,7 +830,6 @@ function validDates()
         app.minDate == "";
         app.maxDate == "";
         var nullDate = new Date();
-        //console.log(nullDate);
 
         return false;
     }
@@ -907,10 +845,6 @@ function validDates()
     {
         return false;
     }
-
-    //if maxDate is in the future
-    //console.log("today: " + today + "  max: " + app.maxDate);
-    //console.log(today < app.maxDate);
 
     if( today < app.maxDate )
     {
@@ -1007,9 +941,6 @@ function fullscreen(mapNum)
     });
 }
 
-//ppm = 24.45 x concentration (mg/m3/molecular weight \
-//ppb = 24.45 X (value / molecular weight)  
-
 function ppbToumg3(value, particleNum)
 {
     var weight = molecularWeights[particleNum];
@@ -1047,7 +978,6 @@ function ppmTougm3(value, particleNum)
     return mg3 * 1000;
 }
 
-//working
 function ugm3Toppm(value, particleNum)
 {
     var weight = molecularWeights[particleNum];
