@@ -21,6 +21,8 @@
     <script type="application/javascript" src="https://cdn.jsdelivr.net/npm/vue"></script>
 
     <script type="application/javascript" src="scripts/airquality.js"></script>
+
+    <script type="application/javascript" src="scripts/leaflet-heat.js"></script>
 </head>
 <body onload="Init()">
     <div id="app">
@@ -43,6 +45,8 @@
                             <option value="co">co</option>
                             <option value="bc">bc</option>
                         </select>
+                        <td>
+                            <input type="checkbox" id="hm" value="off"> Heat Map </input>
                     </tr>
                     <tr>
                         <td class="firstColumn">Min pm25: </td>
